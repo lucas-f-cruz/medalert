@@ -3,18 +3,18 @@
 //  Lista, adiciona, edita e remove medicações do usuário.
 // ============================================================
 import { useState, useEffect } from "react";
-import { medicacaoService }    from "../../services/api";
-import { TEMA }                from "../../styles/tema";
+import { medicacaoService } from "../../services/api";
+import { TEMA } from "../../styles/tema";
 
-const DIAS = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 export function MedicacoesPage() {
-  const [medicacoes,  setMedicacoes]  = useState([]);
-  const [carregando,  setCarregando]  = useState(true);
+  const [medicacoes, setMedicacoes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
-  const [editando,    setEditando]    = useState(null);
-  const [salvando,    setSalvando]    = useState(false);
-  const [form,        setForm]        = useState(formVazio());
+  const [editando, setEditando] = useState(null);
+  const [salvando, setSalvando] = useState(false);
+  const [form, setForm] = useState(formVazio());
   const T = TEMA;
 
   function formVazio() {
@@ -75,7 +75,10 @@ export function MedicacoesPage() {
   }
 
   function updateHorario(i, valor) {
-    setForm(f => ({ ...f, horarios: f.horarios.map((h, idx) => idx === i ? valor : h) }));
+    // Máscara automática HH:MM
+    let v = valor.replace(/[^0-9]/g, "");
+    if (v.length >= 3) v = v.slice(0, 2) + ":" + v.slice(2, 4);
+    setForm(f => ({ ...f, horarios: f.horarios.map((h, idx) => idx === i ? v : h) }));
   }
 
   function removeHorario(i) {
@@ -141,7 +144,14 @@ export function MedicacoesPage() {
       {/* MODAL */}
       {modalAberto && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-          <div style={{ background: T.branco, borderRadius: 16, padding: 28, width: "100%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto" }}>
+          <style>{`
+            .modal-medalert input, .modal-medalert select {
+              background: #ffffff !important;
+              color: #0a1628 !important;
+              color-scheme: light;
+            }
+          `}</style>
+          <div className="modal-medalert" style={{ background: T.branco, borderRadius: 16, padding: 28, width: "100%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, color: T.preto, margin: 0 }}>
                 {editando ? "Editar medicação" : "Nova medicação"}
@@ -150,19 +160,35 @@ export function MedicacoesPage() {
             </div>
 
             <form onSubmit={salvar} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <Campo label="Nome do remédio *" value={form.nome} onChange={v => setForm(f => ({...f, nome: v}))} placeholder="Ex: Losartana" />
-              <Campo label="Dosagem *" value={form.dosagem} onChange={v => setForm(f => ({...f, dosagem: v}))} placeholder="Ex: 50mg, 2 comprimidos" />
-              <Campo label="Instruções" value={form.instrucoes} onChange={v => setForm(f => ({...f, instrucoes: v}))} placeholder="Ex: Tomar em jejum" />
+              <Campo label="Nome do remédio *" value={form.nome} onChange={v => setForm(f => ({ ...f, nome: v }))} placeholder="Ex: Losartana" />
+              <Campo label="Dosagem *" value={form.dosagem} onChange={v => setForm(f => ({ ...f, dosagem: v }))} placeholder="Ex: 50mg, 2 comprimidos" />
+              <Campo label="Instruções" value={form.instrucoes} onChange={v => setForm(f => ({ ...f, instrucoes: v }))} placeholder="Ex: Tomar em jejum" />
 
-              {/* Horários */}
+              {/* Horários — input texto com máscara HH:MM */}
               <div>
-                <label style={{ fontSize: 13, fontWeight: 500, color: T.cinzaEscuro, display: "block", marginBottom: 8 }}>Horários *</label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: T.cinzaEscuro, display: "block", marginBottom: 4 }}>Horários *</label>
+                <p style={{ fontSize: 11, color: T.cinzaClaro, marginBottom: 8 }}>Digite no formato 24h — Ex: 08:00, 14:30, 20:00</p>
                 {form.horarios.map((h, i) => (
-                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                    <input type="time" value={h} onChange={e => updateHorario(i, e.target.value)}
-                      style={{ flex: 1, padding: "9px 12px", border: `1.5px solid ${T.borda}`, borderRadius: 8, fontSize: 14 }} />
+                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
+                    <div style={{ flex: 1, position: "relative" }}>
+                      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 14 }}>⏰</span>
+                      <input
+                        type="text"
+                        value={h}
+                        placeholder="HH:MM"
+                        maxLength={5}
+                        onChange={e => updateHorario(i, e.target.value)}
+                        style={{
+                          width: "100%", padding: "9px 12px 9px 36px",
+                          border: `1.5px solid ${T.borda}`, borderRadius: 8,
+                          fontSize: 15, fontWeight: 600,
+                          background: T.branco, color: T.preto,
+                          boxSizing: "border-box", letterSpacing: 2,
+                        }}
+                      />
+                    </div>
                     {form.horarios.length > 1 && (
-                      <button type="button" onClick={() => removeHorario(i)} style={{ background: T.vermelhoClaro, border: "none", borderRadius: 8, padding: "9px 12px", cursor: "pointer", color: T.vermelho }}>✕</button>
+                      <button type="button" onClick={() => removeHorario(i)} style={{ background: T.vermelhoClaro, border: "none", borderRadius: 8, padding: "9px 12px", cursor: "pointer", color: T.vermelho, flexShrink: 0 }}>✕</button>
                     )}
                   </div>
                 ))}
@@ -179,8 +205,8 @@ export function MedicacoesPage() {
                     <button key={i} type="button" onClick={() => toggleDia(i)} style={{
                       padding: "5px 10px", borderRadius: 7, fontSize: 12, fontWeight: 500, cursor: "pointer",
                       background: form.diasDaSemana.includes(i) ? T.vermelho : T.fundoPage,
-                      color:      form.diasDaSemana.includes(i) ? "#fff" : T.cinza,
-                      border:     `1px solid ${form.diasDaSemana.includes(i) ? T.vermelho : T.borda}`,
+                      color: form.diasDaSemana.includes(i) ? "#fff" : T.cinza,
+                      border: `1px solid ${form.diasDaSemana.includes(i) ? T.vermelho : T.borda}`,
                     }}>{dia}</button>
                   ))}
                 </div>
@@ -190,14 +216,14 @@ export function MedicacoesPage() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
                   <label style={{ fontSize: 13, fontWeight: 500, color: T.cinzaEscuro, display: "block", marginBottom: 6 }}>Ícone</label>
-                  <select value={form.icone} onChange={e => setForm(f => ({...f, icone: e.target.value}))}
-                    style={{ width: "100%", padding: "9px 12px", border: `1.5px solid ${T.borda}`, borderRadius: 8, fontSize: 16 }}>
-                    {["💊","💉","🩺","💚","🔴","🔵","🟡","🫀"].map(i => <option key={i} value={i}>{i}</option>)}
+                  <select value={form.icone} onChange={e => setForm(f => ({ ...f, icone: e.target.value }))}
+                    style={{ width: "100%", padding: "9px 12px", border: `1.5px solid ${T.borda}`, borderRadius: 8, fontSize: 16, background: T.branco, color: T.preto }}>
+                    {["💊", "💉", "🩺", "💚", "🔴", "🔵", "🟡", "🫀"].map(ic => <option key={ic} value={ic}>{ic}</option>)}
                   </select>
                 </div>
                 <div>
                   <label style={{ fontSize: 13, fontWeight: 500, color: T.cinzaEscuro, display: "block", marginBottom: 6 }}>Cor</label>
-                  <input type="color" value={form.cor} onChange={e => setForm(f => ({...f, cor: e.target.value}))}
+                  <input type="color" value={form.cor} onChange={e => setForm(f => ({ ...f, cor: e.target.value }))}
                     style={{ width: "100%", height: 42, border: `1.5px solid ${T.borda}`, borderRadius: 8, cursor: "pointer", padding: 2 }} />
                 </div>
               </div>
@@ -223,8 +249,18 @@ function Campo({ label, value, onChange, placeholder }) {
   return (
     <div>
       <label style={{ fontSize: 13, fontWeight: 500, color: T.cinzaEscuro, display: "block", marginBottom: 6 }}>{label}</label>
-      <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        style={{ width: "100%", padding: "10px 14px", border: `1.5px solid ${T.borda}`, borderRadius: 9, fontSize: 14, color: T.preto, boxSizing: "border-box" }} />
+      <input
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{
+          width: "100%", padding: "10px 14px",
+          border: `1.5px solid ${T.borda}`, borderRadius: 9,
+          fontSize: 14, color: T.preto,
+          background: "#ffffff",
+          boxSizing: "border-box",
+        }}
+      />
     </div>
   );
 }
