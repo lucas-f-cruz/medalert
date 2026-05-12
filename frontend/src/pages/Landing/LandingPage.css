@@ -1,0 +1,52 @@
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(224,49,49,0.3); }
+  60%       { box-shadow: 0 0 0 10px rgba(224,49,49,0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* ── TABLET / MOBILE (≤ 768px) ──────────────────────── */
+@media (max-width: 768px) {
+  .desk        { display: none !important; }
+  .ham         { display: block !important; }
+
+  /* Hero */
+  .hero-grid   { grid-template-columns: 1fr !important; }
+  .hero-right  { display: none !important; }
+  .hero-left   { text-align: center; }
+  .hero-left p { max-width: 100% !important; margin-left: auto; margin-right: auto; }
+  .hero-btns   { justify-content: center !important; }
+  .hero-social { justify-content: center !important; }
+
+  /* Stats */
+  .stats-grid  { grid-template-columns: repeat(2, 1fr) !important; }
+  .stat-item   { border-right: none !important; }
+
+  /* Features */
+  .feat-grid   { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Steps */
+  .steps-grid  { grid-template-columns: repeat(2, 1fr) !important; }
+  .steps-line  { display: none !important; }
+
+  /* Plans */
+  .plan-grid   { grid-template-columns: 1fr !important; }
+
+  /* CTA */
+  .cta-grid    { grid-template-columns: 1fr !important; }
+  .cta-text    { text-align: center; }
+  .band-form   { flex-direction: column !important; align-items: stretch !important; }
+  .band-input  { width: 100% !important; box-sizing: border-box !important; }
+
+  /* Footer */
+  .footer-mob  { justify-content: center !important; text-align: center; }
+}
+
+/* ── MOBILE PEQUENO (≤ 480px) ───────────────────────── */
+@media (max-width: 480px) {
+  .feat-grid  { grid-template-columns: 1fr !important; }
+  .steps-grid { grid-template-columns: 1fr !important; }
+}
