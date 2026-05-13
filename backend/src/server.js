@@ -19,8 +19,15 @@ import { iniciarCronJob }  from "./services/notificacaoService.js";
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
+app.set("etag", false);
+
 // ── MIDDLEWARES ──────────────────────────────────────────────
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+const origemPermitida = (origin, callback) => {
+  if (!origin || /^http:\/\/localhost(:\d+)?$/.test(origin)) return callback(null, true);
+  if (origin === process.env.FRONTEND_URL) return callback(null, true);
+  callback(new Error("Origem não permitida pelo CORS"));
+};
+app.use(cors({ origin: origemPermitida, credentials: true }));
 app.use(express.json());
 
 // ── ROTAS ────────────────────────────────────────────────────

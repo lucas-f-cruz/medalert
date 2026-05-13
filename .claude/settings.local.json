@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"h:\\\\CONCURSOS-E-CURSOS\\\\DevClub\\\\Projetos\\\\PROJETOS-LUCAS-CRUZ\\\\medalert\" -Directory)",
+      "Bash(Select-Object Name)"
+    ]
+  }
+}
