@@ -6,12 +6,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { authService } from "../../services/api";
 import { TEMA } from "../../styles/tema";
 
 export function AuthPage() {
-  const [modo,       setModo]       = useState("login"); // "login" | "cadastro"
+  const [modo,       setModo]       = useState("login"); // "login" | "cadastro" | "esqueci"
   const [carregando, setCarregando] = useState(false);
   const [erro,       setErro]       = useState("");
+  const [sucesso,    setSucesso]    = useState("");
   const [form,       setForm]       = useState({ nome: "", email: "", senha: "", confirmarSenha: "" });
 
   const { login, cadastro } = useAuth();
@@ -21,13 +23,34 @@ export function AuthPage() {
   function handleChange(e) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
     setErro("");
+    setSucesso("");
+  }
+
+  function trocarModo(novoModo) {
+    setModo(novoModo);
+    setErro("");
+    setSucesso("");
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setErro("");
+    setSucesso("");
 
-    // Validações
+    if (modo === "esqueci") {
+      if (!form.email) return setErro("Informe seu email");
+      setCarregando(true);
+      try {
+        const dados = await authService.esqueceuSenha(form.email);
+        setSucesso(dados.mensagem);
+      } catch (error) {
+        setErro(error.message || "Erro ao enviar email");
+      } finally {
+        setCarregando(false);
+      }
+      return;
+    }
+
     if (modo === "cadastro") {
       if (!form.nome.trim()) return setErro("Informe seu nome");
       if (form.senha !== form.confirmarSenha) return setErro("As senhas não coincidem");
@@ -98,28 +121,34 @@ export function AuthPage() {
 
           {/* Título */}
           <h2 style={{ fontSize: 26, fontWeight: 800, color: T.preto, marginBottom: 6, letterSpacing: -0.5 }}>
-            {modo === "login" ? "Bem-vindo de volta!" : "Criar sua conta"}
+            {modo === "esqueci" ? "Recuperar senha" : modo === "login" ? "Bem-vindo de volta!" : "Criar sua conta"}
           </h2>
           <p style={{ fontSize: 14, color: T.cinza, marginBottom: 28 }}>
-            {modo === "login" ? "Entre para gerenciar suas medicações" : "Comece a cuidar da sua saúde hoje"}
+            {modo === "esqueci"
+              ? "Digite seu email e enviaremos as instruções"
+              : modo === "login"
+              ? "Entre para gerenciar suas medicações"
+              : "Comece a cuidar da sua saúde hoje"}
           </p>
 
-          {/* Tabs Login / Cadastro */}
-          <div style={{ display: "flex", background: T.fundoPage, borderRadius: 10, padding: 4, marginBottom: 28 }}>
-            {["login", "cadastro"].map(m => (
-              <button key={m} onClick={() => { setModo(m); setErro(""); }} style={{
-                flex: 1, padding: "9px", border: "none", borderRadius: 8, cursor: "pointer",
-                background: modo === m ? T.branco : "transparent",
-                color:      modo === m ? T.preto : T.cinza,
-                fontWeight: modo === m ? 600 : 400,
-                fontSize: 13,
-                boxShadow: modo === m ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
-                transition: "all 0.2s",
-              }}>
-                {m === "login" ? "Entrar" : "Criar conta"}
-              </button>
-            ))}
-          </div>
+          {/* Tabs Login / Cadastro — oculta no modo esqueci */}
+          {modo !== "esqueci" && (
+            <div style={{ display: "flex", background: T.fundoPage, borderRadius: 10, padding: 4, marginBottom: 28 }}>
+              {["login", "cadastro"].map(m => (
+                <button key={m} onClick={() => trocarModo(m)} style={{
+                  flex: 1, padding: "9px", border: "none", borderRadius: 8, cursor: "pointer",
+                  background: modo === m ? T.branco : "transparent",
+                  color:      modo === m ? T.preto : T.cinza,
+                  fontWeight: modo === m ? 600 : 400,
+                  fontSize: 13,
+                  boxShadow: modo === m ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                  transition: "all 0.2s",
+                }}>
+                  {m === "login" ? "Entrar" : "Criar conta"}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Formulário */}
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -127,7 +156,9 @@ export function AuthPage() {
               <Campo label="Nome completo" name="nome" type="text" placeholder="Lucas Cruz" value={form.nome} onChange={handleChange} />
             )}
             <Campo label="E-mail" name="email" type="email" placeholder="seu@email.com" value={form.email} onChange={handleChange} />
-            <Campo label="Senha" name="senha" type="password" placeholder="Mínimo 6 caracteres" value={form.senha} onChange={handleChange} />
+            {modo !== "esqueci" && (
+              <Campo label="Senha" name="senha" type="password" placeholder="Mínimo 6 caracteres" value={form.senha} onChange={handleChange} />
+            )}
             {modo === "cadastro" && (
               <Campo label="Confirmar senha" name="confirmarSenha" type="password" placeholder="Repita a senha" value={form.confirmarSenha} onChange={handleChange} />
             )}
@@ -139,23 +170,44 @@ export function AuthPage() {
               </div>
             )}
 
+            {/* Sucesso */}
+            {sucesso && (
+              <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#16a34a" }}>
+                ✅ {sucesso}
+              </div>
+            )}
+
             {/* Esqueci senha */}
             {modo === "login" && (
               <div style={{ textAlign: "right", marginTop: -4 }}>
-                <span style={{ fontSize: 12, color: T.azul, cursor: "pointer" }}>Esqueci minha senha</span>
+                <span onClick={() => trocarModo("esqueci")} style={{ fontSize: 12, color: T.azul, cursor: "pointer" }}>
+                  Esqueci minha senha
+                </span>
               </div>
             )}
 
             {/* Botão */}
-            <button type="submit" disabled={carregando} style={{
-              background: T.vermelho, color: "#fff", border: "none",
-              padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 700,
-              cursor: carregando ? "not-allowed" : "pointer",
-              opacity: carregando ? 0.7 : 1,
-              marginTop: 4, transition: "opacity 0.2s",
-            }}>
-              {carregando ? "Aguarde..." : modo === "login" ? "Entrar" : "Criar conta grátis"}
-            </button>
+            {!sucesso && (
+              <button type="submit" disabled={carregando} style={{
+                background: T.vermelho, color: "#fff", border: "none",
+                padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                cursor: carregando ? "not-allowed" : "pointer",
+                opacity: carregando ? 0.7 : 1,
+                marginTop: 4, transition: "opacity 0.2s",
+              }}>
+                {carregando ? "Aguarde..." : modo === "esqueci" ? "Enviar instruções" : modo === "login" ? "Entrar" : "Criar conta grátis"}
+              </button>
+            )}
+
+            {/* Voltar ao login */}
+            {modo === "esqueci" && (
+              <button type="button" onClick={() => trocarModo("login")} style={{
+                background: "transparent", border: `1.5px solid ${T.borda}`, color: T.cinzaEscuro,
+                padding: "11px", borderRadius: 10, fontSize: 13, cursor: "pointer",
+              }}>
+                ← Voltar ao login
+              </button>
+            )}
           </form>
 
           {/* Rodapé */}

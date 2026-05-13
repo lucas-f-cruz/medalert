@@ -24,6 +24,7 @@ async function req(method, rota, body = null, comAuth = true) {
     method,
     headers: headers(comAuth),
     body: body ? JSON.stringify(body) : null,
+    cache: "no-store",
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.erro || "Erro na requisição");
@@ -32,9 +33,11 @@ async function req(method, rota, body = null, comAuth = true) {
 
 // ── AUTH ────────────────────────────────────────────────────
 export const authService = {
-  cadastro: (dados) => req("POST", "/auth/cadastro", dados, false),
-  login:    (dados) => req("POST", "/auth/login",    dados, false),
-  perfil:   ()      => req("GET",  "/auth/perfil"),
+  cadastro:       (dados)          => req("POST", "/auth/cadastro",        dados,           false),
+  login:          (dados)          => req("POST", "/auth/login",           dados,           false),
+  perfil:         ()               => req("GET",  "/auth/perfil"),
+  esqueceuSenha:  (email)          => req("POST", "/auth/esqueceu-senha",  { email },       false),
+  redefinirSenha: (token, senha)   => req("POST", "/auth/redefinir-senha", { token, senha}, false),
 };
 
 // ── MEDICAÇÕES ───────────────────────────────────────────────

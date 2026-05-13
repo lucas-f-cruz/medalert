@@ -3,7 +3,9 @@
 //  Rotas: POST /auth/cadastro | POST /auth/login | GET /auth/perfil
 // ============================================================
 import jwt        from "jsonwebtoken";
+import crypto      from "crypto";
 import { Usuario } from "../models/Usuario.js";
+import { enviarEmailReset } from "../config/email.js";
 
 function gerarToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -67,6 +69,67 @@ export async function login(req, res) {
   } catch (error) {
     console.error("❌ Erro no login:", error);
     res.status(500).json({ erro: "Erro interno no servidor" });
+  }
+}
+
+// ── ESQUECEU SENHA ───────────────────────────────────────────
+export async function esqueceuSenha(req, res) {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ erro: "Informe o email" });
+
+    const usuario = await Usuario.findOne({ email });
+
+    // Resposta genérica para não revelar se o email existe
+    const mensagem = "Se esse email estiver cadastrado, você receberá as instruções em breve.";
+
+    if (!usuario) return res.json({ mensagem });
+
+    const token = crypto.randomBytes(32).toString("hex");
+    usuario.resetPasswordToken   = token;
+    usuario.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+    await usuario.save({ validateBeforeSave: false });
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    await enviarEmailReset(usuario.email, usuario.nome, resetUrl);
+
+    res.json({ mensagem });
+  } catch (error) {
+    console.error("❌ Erro em esqueceu-senha:", error);
+    res.status(500).json({ erro: "Erro ao processar solicitação" });
+  }
+}
+
+// ── REDEFINIR SENHA ──────────────────────────────────────────
+export async function redefinirSenha(req, res) {
+  try {
+    const { token, senha } = req.body;
+
+    if (!token || !senha) {
+      return res.status(400).json({ erro: "Token e nova senha são obrigatórios" });
+    }
+    if (senha.length < 6) {
+      return res.status(400).json({ erro: "Senha deve ter no mínimo 6 caracteres" });
+    }
+
+    const usuario = await Usuario.findOne({
+      resetPasswordToken:   token,
+      resetPasswordExpires: { $gt: Date.now() },
+    }).select("+senha +resetPasswordToken +resetPasswordExpires");
+
+    if (!usuario) {
+      return res.status(400).json({ erro: "Link inválido ou expirado. Solicite um novo." });
+    }
+
+    usuario.senha                = senha;
+    usuario.resetPasswordToken   = undefined;
+    usuario.resetPasswordExpires = undefined;
+    await usuario.save();
+
+    res.json({ mensagem: "Senha redefinida com sucesso! Faça login com a nova senha." });
+  } catch (error) {
+    console.error("❌ Erro em redefinir-senha:", error);
+    res.status(500).json({ erro: "Erro ao redefinir senha" });
   }
 }
 

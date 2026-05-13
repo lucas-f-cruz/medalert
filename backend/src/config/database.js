@@ -6,7 +6,10 @@ import mongoose from "mongoose";
 
 export async function connectDB() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(process.env.MONGODB_URI, {
+      tls: true,
+      tlsAllowInvalidCertificates: true,
+    });
     console.log("✅ MongoDB conectado com sucesso!");
   } catch (error) {
     console.error("❌ Erro ao conectar ao MongoDB:", error.message);

@@ -5,6 +5,7 @@
 // ============================================================
 import { useNavigate } from "react-router-dom";
 import { TEMA } from "../../styles/tema";
+import "./LandingPage.css";
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -18,24 +19,8 @@ export function LandingPage() {
     <div style={{ fontFamily: "'Inter', sans-serif", background: "#fff", color: T.preto, minHeight: "100vh" }}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
-      <style>{`
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { overflow-x: hidden; }
-        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(224,49,49,0.3)} 60%{box-shadow:0 0 0 10px rgba(224,49,49,0)} }
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        @media(max-width:768px){
-          .hero-grid { grid-template-columns: 1fr !important; }
-          .hero-right { display: none !important; }
-          .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
-          .feat-grid  { grid-template-columns: 1fr !important; }
-          .steps-grid { grid-template-columns: repeat(2,1fr) !important; }
-          .plan-grid  { grid-template-columns: 1fr !important; }
-          .cta-grid   { grid-template-columns: 1fr !important; }
-          .band-form  { flex-direction: column !important; }
-        }
-      `}</style>
 
-      {/* ── NAVBAR ─────────────────────────────────────────── */}
+{/* ── NAVBAR ─────────────────────────────────────────── */}
       <nav style={{
         display: "flex", justifyContent: "space-between", alignItems: "center",
         padding: "16px 5%", borderBottom: `1px solid ${T.borda}`,
@@ -63,7 +48,7 @@ export function LandingPage() {
         <div className="hero-grid" style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>
 
           {/* Esquerda */}
-          <div>
+          <div className="hero-left">
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: T.vermelhoClaro, border: `1px solid ${T.vermelhoBorda}`, borderRadius: 20, padding: "5px 14px", fontSize: 11, color: T.vermelho, fontWeight: 600, marginBottom: 20, letterSpacing: 0.5 }}>
               💊 Secretária eletrônica de medicações
             </div>
@@ -73,7 +58,7 @@ export function LandingPage() {
             <p style={{ fontSize: 15, color: T.cinza, lineHeight: 1.8, maxWidth: 420, marginBottom: 32, fontWeight: 300 }}>
               MedAlert cuida dos seus horários de medicação com alarmes inteligentes, lembretes personalizados e controle completo para você e sua família.
             </p>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 36 }}>
+            <div className="hero-btns" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 36 }}>
               <button onClick={irParaAuth} style={{ background: T.vermelho, color: "#fff", border: "none", padding: "13px 30px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
                 Criar conta grátis
               </button>
@@ -81,7 +66,7 @@ export function LandingPage() {
                 ▶ Ver demonstração
               </button>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div className="hero-social" style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ display: "flex" }}>
                 {["#e03131","#1d4ed8","#0a1628","#7c3aed"].map((c, i) => (
                   <div key={i} style={{ width: 28, height: 28, borderRadius: "50%", background: c, border: "2px solid #fff", marginLeft: i === 0 ? 0 : -6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#fff" }}>
@@ -164,7 +149,7 @@ export function LandingPage() {
             { num: "4.9★",  label: "Avaliação média"   },
             { num: "0%",    label: "Esquecimentos"     },
           ].map((s, i) => (
-            <div key={i} style={{ padding: "28px 20px", textAlign: "center", borderRight: i < 3 ? `1px solid ${T.borda}` : "none" }}>
+            <div key={i} className="stat-item" style={{ padding: "28px 20px", textAlign: "center", borderRight: i < 3 ? `1px solid ${T.borda}` : "none" }}>
               <p style={{ fontSize: 30, fontWeight: 800, color: T.vermelho, margin: 0, letterSpacing: -1 }}>{s.num}</p>
               <p style={{ fontSize: 11, color: T.cinzaClaro, marginTop: 4 }}>{s.label}</p>
             </div>
@@ -207,7 +192,7 @@ export function LandingPage() {
           <h2 style={{ textAlign: "center", fontSize: "clamp(22px,4vw,36px)", fontWeight: 800, color: T.preto, marginBottom: 8, letterSpacing: -0.5 }}>4 passos simples</h2>
           <p style={{ textAlign: "center", fontSize: 14, color: T.cinzaClaro, marginBottom: 48 }}>Comece em menos de 2 minutos</p>
           <div className="steps-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 24, position: "relative" }}>
-            <div style={{ position: "absolute", top: 22, left: "12%", right: "12%", height: 1, background: `repeating-linear-gradient(90deg,${T.vermelho} 0,${T.vermelho} 8px,transparent 8px,transparent 16px)`, zIndex: 0 }} />
+            <div className="steps-line" style={{ position: "absolute", top: 22, left: "12%", right: "12%", height: 1, background: `repeating-linear-gradient(90deg,${T.vermelho} 0,${T.vermelho} 8px,transparent 8px,transparent 16px)`, zIndex: 0 }} />
             {[
               { n: "1", titulo: "Crie sua conta",     desc: "Cadastro rápido e gratuito." },
               { n: "2", titulo: "Adicione remédios",  desc: "Nome, dose e horário de cada medicação." },
@@ -269,12 +254,12 @@ export function LandingPage() {
       {/* ── CTA FINAL ──────────────────────────────────────── */}
       <section style={{ background: T.azul, padding: "56px 5%" }}>
         <div className="cta-grid" style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr auto", gap: 32, alignItems: "center" }}>
-          <div>
+          <div className="cta-text">
             <h2 style={{ fontSize: "clamp(20px,3vw,32px)", fontWeight: 800, color: "#fff", marginBottom: 8, letterSpacing: -0.5 }}>Comece a cuidar da sua saúde hoje</h2>
             <p style={{ fontSize: 14, color: "rgba(255,255,255,0.65)" }}>Cadastre-se gratuitamente e receba acesso imediato</p>
           </div>
           <div className="band-form" style={{ display: "flex", gap: 8 }}>
-            <input placeholder="Seu melhor e-mail" style={{
+            <input className="band-input" placeholder="Seu melhor e-mail" style={{
               background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.2)",
               color: "#fff", padding: "12px 16px", borderRadius: 10, fontSize: 13, width: 220,
             }} />
@@ -286,7 +271,7 @@ export function LandingPage() {
       </section>
 
       {/* ── FOOTER ─────────────────────────────────────────── */}
-      <footer style={{ padding: "24px 5%", borderTop: `1px solid ${T.borda}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+      <footer className="footer-mob" style={{ padding: "24px 5%", borderTop: `1px solid ${T.borda}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
         <span style={{ fontSize: 16, fontWeight: 700, color: T.preto }}>Med<span style={{ color: T.vermelho }}>Alert</span></span>
         <p style={{ fontSize: 11, color: T.cinzaClaro }}>© {new Date().getFullYear()} MedAlert · Todos os direitos reservados</p>
         <div style={{ display: "flex", gap: 20 }}>
